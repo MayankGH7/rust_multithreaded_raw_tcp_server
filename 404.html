@@ -1,0 +1,108 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Rust in Peace</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Courier New', monospace;
+      background-color: #8B4513;
+      color: #DEB887;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 8vw;
+      text-shadow: 2px 2px 4px #000000;
+    }
+
+    p {
+      font-size: 2vw;
+      text-align: center;
+      max-width: 80%;
+    }
+
+    .rust-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    @keyframes rust {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <img style="width: 300px" src="https://doc.rust-lang.org/book/img/ferris/panics.svg" alt="">
+    <h1>404</h1>
+    <p>Oops! This page has rusted away.</p>
+    <svg class="rust-overlay" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 1" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#noise)" opacity="0.05" />
+    </svg>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      const container = document.querySelector('.container');
+      const rustOverlay = document.querySelector('.rust-overlay');
+
+      function createRustSpot() {
+        const spot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const radius = Math.random() * 5 + 2;
+
+        spot.setAttribute("cx", x + "%");
+        spot.setAttribute("cy", y + "%");
+        spot.setAttribute("r", radius);
+        spot.setAttribute("fill", "#8B4513");
+        spot.style.animation = `rust ${Math.random() * 3 + 2}s infinite`;
+
+        rustOverlay.appendChild(spot);
+      }
+
+      for (let i = 0; i < 50; i++) {
+        createRustSpot();
+      }
+
+      setInterval(createRustSpot, 2000);
+    });
+  </script>
+</body>
+
+</html>

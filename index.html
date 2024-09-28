@@ -1,0 +1,130 @@
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Simple Raw TCP Web Server in Rust</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #23201f;
+      color: #e6e1dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .logo {
+      width: 150px;
+      height: 150px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #dea584;
+      text-align: center;
+    }
+
+    .code-section {
+      background-color: #2b2b2b;
+      border-radius: 8px;
+      padding: 20px;
+      width: 80%;
+      max-width: 800px;
+      overflow-x: auto;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .keyword {
+      color: #b294bb;
+    }
+
+    .string {
+      color: #b5bd68;
+    }
+
+    .comment {
+      color: #969896;
+    }
+
+    .function {
+      color: #81a2be;
+    }
+
+    .number {
+      color: #de935f;
+    }
+  </style>
+</head>
+
+<body>
+  <img style="width:50%; height: 50%; min-width: 340px;" src="https://rustacean.net/assets/rustacean-flat-happy.svg">
+
+
+
+  <h1>Simple Raw TCP Web Server in <i class="fa-brands fa-rust"></i>ust </h1>
+  <!-- https://upload.wikimedia.org/wikipedia/commons/d/d5/Rust_programming_language_black_logo.svg-->
+
+  <div class="code-section" style="font-weight: bold;">
+    <pre><code><span style="color: #c678dd;" class="keyword">use</span> std::fs;
+  <span style="color: #c678dd;" class="keyword">use</span> std::io::prelude::*;
+  <span style="color: #c678dd;" class="keyword">use</span> std::net::{TcpListener, TcpStream};
+  <span style="color: #c678dd;" class="keyword">use</span> web_server::ThreadPool;
+  
+  <span style="color: #c678dd;" class="keyword">fn</span> <span style="color: #61afef;" class="function">main</span>() {
+    <span style="color: #c678dd;" class="keyword">let</span> listener: TcpListener = TcpListener::bind(<span style="color: #98c379;" class="string">"127.0.0.1:8080"</span>).unwrap();
+  
+    <span style="color: #c678dd;" class="keyword">let</span> pool = ThreadPool::new(<span style="color: #d19a66;" class="number">4</span>);
+  
+    <span style="color: #c678dd;" class="keyword">for</span> stream <span style="color: #c678dd;" class="keyword">in</span> listener.incoming() {
+      <span style="color: #c678dd;" class="keyword">let</span> stream: TcpStream = stream.unwrap();
+  
+      pool.execute(|| {
+        handle_connection(stream);
+      });
+    }
+  }
+  
+  <span style="color: #c678dd;" class="keyword">fn</span> <span style="color: #61afef;" class="function">handle_connection</span>(mut stream: TcpStream) {
+    <span style="color: #c678dd;" class="keyword">let</span> mut buffer: [<span style="color: #d19a66;" class="number">u8</span>; <span style="color: #d19a66;" class="number">1024</span>] = [<span style="color: #d19a66;" class="number">0</span>; <span style="color: #d19a66;" class="number">1024</span>];
+  
+    stream.read(&mut buffer).unwrap();
+  
+    <span style="color: #c678dd;" class="keyword">let</span> get: &[u8; <span style="color: #d19a66;" class="number">16</span>] = b<span style="color: #98c379;" class="string">"GET / HTTP/1.1\r\n"</span>;
+    <span style="color: #c678dd;" class="keyword">let</span> sleep = b<span style="color: #98c379;" class="string">"GET /sleep HTTP/1.1\r\n"</span>;
+    <span style="color: #c678dd;" class="keyword">let</span> (statusline, filename) = <span style="color: #c678dd;" class="keyword">if</span> buffer.starts_with(get) {
+      (<span style="color: #98c379;" class="string">"HTTP/1.1 200 OK"</span>, <span style="color: #98c379;" class="string">"index.html"</span>)
+    } <span style="color: #c678dd;" class="keyword">else if</span> buffer.starts_with(sleep) {
+      std::thread::sleep(std::time::Duration::from_secs(<span style="color: #d19a66;" class="number">5</span>));
+      (<span style="color: #98c379;" class="string">"HTTP/1.1 200 OK"</span>, <span style="color: #98c379;" class="string">"index.html"</span>)
+    } <span style="color: #c678dd;" class="keyword">else</span> {
+      (<span style="color: #98c379;" class="string">"HTTP/1.1 404 NOT FOUND"</span>, <span style="color: #98c379;" class="string">"404.html"</span>)
+    };
+  
+    <span style="color: #c678dd;" class="keyword">let</span> contents: <span style="color: #d19a66;" class="number">String</span> = fs::read_to_string(filename).unwrap();
+    <span style="color: #c678dd;" class="keyword">let</span> response: <span style="color: #d19a66;" class="number">String</span> = format!(
+      <span style="color: #98c379;" class="string">"{}\r\nContent-Length: {}\r\nServer: Rust bhai ka server hai\r\n\r\n{}"</span>,
+      statusline,
+      contents.len(),
+      contents
+    );
+  
+    stream.write(response.as_bytes()).unwrap();
+  }
+  </code></pre>
+  </div>
+
+
+
+</body>
+
+</html>
